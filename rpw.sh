@@ -18,7 +18,7 @@ Options:
 EOF
 }
 
-# Pre-process long options
+
 for arg in "$@"; do
   case "$arg" in
     --help)
@@ -39,7 +39,6 @@ while getopts ":l:sLch" opt; do
   esac
 done
 
-# Determine charset
 if [ "$challenge_mode" -eq 1 ]; then
   charset="abcdef0123456789"
 else
