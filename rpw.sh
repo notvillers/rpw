@@ -70,9 +70,9 @@ fi
 # checking min_length
 if [ "$length" -lt "$min_length" ]; then
   echo "Length ($length) is smaller than the minimum required, because you defined:" 
-  [ "$must_have_number" -eq 1 ] && echo " - Password must contain a number"
-  [ "$must_have_char" -eq 1 ] && echo " - Password must contain a character"
-  [ "$must_have_symbol" -eq 1 ] && echo " - Password must contain a symbol"
+  [ "$must_have_number" -eq 1 ] && echo " - must contain a number"
+  [ "$must_have_char" -eq 1 ] && echo " - must contain a character"
+  [ "$must_have_symbol" -eq 1 ] && echo " - must contain a symbol"
   exit 1
 fi
 
