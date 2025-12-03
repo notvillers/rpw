@@ -14,7 +14,7 @@ min_length=0
 # Print help
 print_help() {
   cat <<EOF
-Usage: $(basename $0) [options]
+Usage: $(basename "$0") [options]
 
 Description:
 R(andom)P(ass)W(ord) generates a random string from the (pre)specified charset, default charset is [A-Za-z0-9].
