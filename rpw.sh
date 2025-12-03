@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # Default variables
 length=32 # Default length
@@ -13,10 +14,10 @@ min_length=0
 # Print help
 print_help() {
   cat <<EOF
-Usage: ./rpw [options]
+Usage: $(basename $0) [options]
 
 Description:
-R(andom)P(ass)W(ord) generates a random string from the (pre)specified charset
+R(andom)P(ass)W(ord) generates a random string from the (pre)specified charset, default charset is [A-Za-z0-9].
 
 Options:
   -l <length>     Set password length (default: 32)
@@ -63,7 +64,7 @@ fi
 
 # Challenge mode cannot be combined with must-have flags
 if [ "$challenge_mode" -eq 1 ] && [ "$min_length" -gt 0 ]; then
-  echo "Error: Challenge mode cannot be combined with -N, -C, or -S flags." >&2
+  echo "Error: Challenge mode cannot be combined with -s, -L, -N, -C, or -S flags." >&2
   exit 1
 fi
 
