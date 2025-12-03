@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# default variables
-length=32
+# Default variables
+length=32 # Default length
 use_symbols=0
 lower_only=0
 challenge_mode=0
@@ -10,7 +10,7 @@ must_have_char=0
 must_have_symbol=0
 min_length=0
 
-# help fn
+# Print help
 print_help() {
   cat <<EOF
 Usage: ./rpw [options]
@@ -30,7 +30,7 @@ Options:
 EOF
 }
 
-# help arg
+# Help arg
 for arg in "$@"; do
   case "$arg" in
     --help)
@@ -40,7 +40,7 @@ for arg in "$@"; do
   esac
 done
 
-# getopts
+# Options
 while getopts ":l:scLhNCS" opt; do
   case "$opt" in
     l) length="$OPTARG" ;;
@@ -55,28 +55,28 @@ while getopts ":l:scLhNCS" opt; do
   esac
 done
 
-# length validate
+# Length validate
 if ! [[ "$length" =~ ^[0-9]+$ ]] || [ "$length" -lt 1 ]; then
   echo "Error: -l <length> must be a positive integer (1 or larger)." >&2
   exit 1
 fi
 
-# challenge mode cannot be combined with must-have flags
+# Challenge mode cannot be combined with must-have flags
 if [ "$challenge_mode" -eq 1 ] && [ "$min_length" -gt 0 ]; then
   echo "Error: Challenge mode cannot be combined with -N, -C, or -S flags." >&2
   exit 1
 fi
 
-# checking min_length
+# Checking min_length
 if [ "$length" -lt "$min_length" ]; then
-  echo "Length ($length) is smaller than the minimum required, because you defined:" 
-  [ "$must_have_number" -eq 1 ] && echo " - must contain a number"
-  [ "$must_have_char" -eq 1 ] && echo " - must contain a character"
-  [ "$must_have_symbol" -eq 1 ] && echo " - must contain a symbol"
+  echo "Length ($length) is smaller than the minimum required ($min_length), because it must contain:" 
+  [ "$must_have_number" -eq 1 ] && echo " - a number"
+  [ "$must_have_char" -eq 1 ] && echo " - a character"
+  [ "$must_have_symbol" -eq 1 ] && echo " - a symbol"
   exit 1
 fi
 
-# determine charset
+# Determine charset
 if [ "$challenge_mode" -eq 1 ]; then
   charset="abcdef0123456789"
 else
@@ -91,19 +91,24 @@ else
   fi
 fi
 
-# password generation function
+# Password generation function
 generate_pw() {
   LC_ALL=C tr -dc "$charset" < /dev/urandom | head -c "$length"
 }
 
-# generating password with must-have constraints
+# Generating password with constraint checks
 password=""
 while :; do
   password=$(generate_pw)
   ok=1
 
+  # Check for number, if needed
   [ "$must_have_number" -eq 1 ] && ! [[ "$password" =~ [0-9] ]] && ok=0
+
+  # Check for alphabetic char, if needed
   [ "$must_have_char" -eq 1 ]   && ! [[ "$password" =~ [A-Za-z] ]] && ok=0
+
+  # Check for symbol, if needed
   [ "$must_have_symbol" -eq 1 ] && ! [[ "$password" =~ [^A-Za-z0-9] ]] && ok=0
 
   [ "$ok" -eq 1 ] && break
