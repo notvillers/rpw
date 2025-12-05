@@ -25,13 +25,13 @@ R(andom)P(ass)W(ord) generates a random string from the (pre)specified charset, 
 
 Options:
   -l <length>     Set password length (default: $length)
+  -r <count>      Number of generated password(s) (default: $repeat_count)
   -s              Include symbols
   -c              Challenge mode (charset: $challenge_charset)
   -L              Use lowercase alphanumeric only
   -N              Password must contain a digit
   -C              Password must contain a character
   -S              Password must contain a symbol
-  -r <count>      Number of generated password(s) (default: $repeat_count)
   -h, --help      Show this help message
 EOF
 }
