@@ -75,8 +75,8 @@ if ! [[ "$repeat_count" =~ ^[0-9]+$ ]] || [ "$repeat_count" -lt 1 ]; then
 fi
 
 # Challenge combination check
-if [[ "$challenge_mode" -eq 1 && ( "$min_length" -gt 0 || "$use_symbols" -ne 0 || "$lower_only" -ne 0 ) ]] ; then
-  printf "Error: Challenge (-c) flag cannot be combined with -s, -L, -N, -C, or -S flags.\n" >&2
+if [[ "$challenge_mode" -eq 1 && ( "$min_length" -gt 0 || "$use_symbols" -ne 0 ) ]] ; then
+  printf "Error: Challenge (-c) flag cannot be combined with -s, -N, -C, or -S flags.\n" >&2
   exit 1
 fi
 
