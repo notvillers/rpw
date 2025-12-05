@@ -4,8 +4,8 @@
 
 ### Parameters:
 
-- l (length): Sets the length of the password(s). Takes a positive larger than 0 integer. Default is 32
-- r (count): Count of printed out password(s). Takes a positive larger than 0 integer. Default is 1
+- l (length): Sets the length of the password(s). Takes a larger than 0 integer. Default is 32
+- r (count): Count of printed out password(s). Takes a larger than 0 integer. Default is 1
 
 ### Flags:
 
