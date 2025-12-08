@@ -7,6 +7,7 @@ repeat_count=1 # Number of generated password(s)
 use_symbols=0 # Sets to 1 if symbols is needed in the password
 lower_only=0 # Sets to 1 if password should containt lowercase characters only
 challenge_mode=0 # Sets to 1 if generation is a challenge-response
+numbers_only=0 # Numbers only
 must_have_number=0 # Sets to 1 if password must contain at least 1 number
 must_have_char=0 # Sets to 1 if password must contain at least 1 alphanumeric character
 must_have_symbol=0 # Sets to 1 if password must contain at least 1 symbol
@@ -29,38 +30,92 @@ Options:
   -s              Include symbols
   -c              Challenge mode (charset: $challenge_charset)
   -L              Use lowercase alphanumeric only
+  -n              Password must contain number(s) only
   -N              Password must contain a digit
   -C              Password must contain a character
   -S              Password must contain a symbol
   -h, --help      Show this help message
+  --easy          Sets parameters for an easy password (Can be freely combined with other available flags)
+  --medium        Sets parameters for a medium password (Can be freely combined with other available flags)
+  --hard          Sets parameters for a hard password (Can be freely combined with other available flags)
 EOF
 }
 
-# Help arg
+set_easy() {
+  length=8
+  lower_only=1
+}
+
+set_medium() {
+  length=16
+  must_have_number=1
+  must_have_char=1
+}
+
+set_hard() {
+  length=32
+  use_symbols=1
+  must_have_number=1
+  must_have_char=1
+  must_have_char=1
+}
+
+args=()
+# Args
 for arg in "$@"; do
   case "$arg" in
     --help)
       print_help
       exit 0
       ;;
+    --easy)
+      set_easy
+      ;;
+    --medium)
+      set_medium
+      ;;
+    --hard)
+      set_hard
+      ;;
+    *)
+      args+=("$arg")
+      ;;
   esac
 done
 
+set -- "${args[@]}"
+
 # Options
-while getopts ":l:r:scLNCSh" opt; do
+while getopts ":l:r:sncLNCSh" opt; do
   case "$opt" in
     l) length="$OPTARG" ;;
     r) repeat_count="$OPTARG" ;;
     s) use_symbols=1 ;;
+    n) numbers_only=1 ;;
     c) challenge_mode=1 ;;
     L) lower_only=1 ;;
-    N) must_have_number=1; ((min_length++)) ;;
-    C) must_have_char=1; ((min_length++)) ;;
-    S) must_have_symbol=1; ((min_length++)) ;;
+    N) must_have_number=1 ;;
+    C) must_have_char=1 ;;
+    S) must_have_symbol=1 ;;
     h) print_help; exit 0 ;;
     \?) printf "Invalid option: -%s\n" "$OPTARG"; print_help; exit 1 ;;
   esac
 done
+
+# Min. length increase, if needed
+if [ "$must_have_number" -ne 0 ]; then
+  ((min_length++))
+fi
+
+# Min. length increase, if needed
+if [ "$must_have_char" -ne 0 ]; then
+  ((min_length++))
+fi
+
+# Min. length increase, if needed
+if [ "$must_have_symbol" -ne 0 ]; then
+  ((min_length++))
+fi
 
 # Length validate
 if ! [[ "$length" =~ ^[0-9]+$ ]] || [ "$length" -lt 1 ]; then
@@ -74,9 +129,15 @@ if ! [[ "$repeat_count" =~ ^[0-9]+$ ]] || [ "$repeat_count" -lt 1 ]; then
   exit 1
 fi
 
+# Numbers only combination check
+if [[ "$numbers_only" -eq 1 && ( "$min_length" -gt 0 || "$use_symbols" -ne 0 || "$challenge_mode" -ne 0 ) ]] ; then
+  printf "Error: Numbers only (-n) flag cannot be combined with -s, -c, -N, -C, or -S flags.\n" >&2
+  exit 1
+fi
+
 # Challenge combination check
-if [[ "$challenge_mode" -eq 1 && ( "$min_length" -gt 0 || "$use_symbols" -ne 0 ) ]] ; then
-  printf "Error: Challenge (-c) flag cannot be combined with -s, -N, -C, or -S flags.\n" >&2
+if [[ "$challenge_mode" -eq 1 && ( "$min_length" -gt 0 || "$use_symbols" -ne 0 || "$numbers_only" -ne 0 ) ]] ; then
+  printf "Error: Challenge (-c) flag cannot be combined with -s, -n, -N, -C, or -S flags.\n" >&2
   exit 1
 fi
 
@@ -92,6 +153,8 @@ fi
 # Determine charset
 if [ "$challenge_mode" -eq 1 ]; then
   charset=$challenge_charset
+elif [ "$numbers_only" -eq 1 ]; then
+  charset="0-9"
 else
   if [ "$lower_only" -eq 1 ]; then
     charset="a-z0-9"
