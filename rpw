@@ -12,6 +12,7 @@ must_have_number=0 # Sets to 1 if password must contain at least 1 number
 must_have_char=0 # Sets to 1 if password must contain at least 1 alphanumeric character
 must_have_symbol=0 # Sets to 1 if password must contain at least 1 symbol
 min_length=0 # Varies by given -N, -C and -S flags
+out_path="" # Out put path if given
 
 challenge_charset="abcdef0123456789" # Charset for challenge-response
 symbol_charset="!@#\$%^&*()_+-=[]{}|;:,.<>?/" # Charset for symbols
@@ -34,6 +35,7 @@ Options:
   -N              Password must contain a digit
   -C              Password must contain a character
   -S              Password must contain a symbol
+  -o <file>       Appends output(s) to file instead of stdout
   -h, --help      Show this help message
   --easy          Sets parameters for an easy password (Can be freely combined with other available flags)
   --medium        Sets parameters for a medium password (Can be freely combined with other available flags)
@@ -86,7 +88,7 @@ done
 set -- "${args[@]}"
 
 # Options
-while getopts ":l:r:sncLNCSh" opt; do
+while getopts ":l:r:sncLNCSo:h" opt; do
   case "$opt" in
     l) length="$OPTARG" ;;
     r) repeat_count="$OPTARG" ;;
@@ -97,6 +99,7 @@ while getopts ":l:r:sncLNCSh" opt; do
     N) must_have_number=1 ;;
     C) must_have_char=1 ;;
     S) must_have_symbol=1 ;;
+    o) out_path="$OPTARG" ;;
     h) print_help; exit 0 ;;
     \?) printf "Invalid option: -%s\n" "$OPTARG"; print_help; exit 1 ;;
   esac
@@ -190,5 +193,10 @@ for (( i=0; i<repeat_count; i++ )); do
 
     [ "$ok" -eq 1 ] && break
   done
-  printf "%s\n" "$password"
+
+  if [ -n "$out_path" ]; then
+    printf "%s\n" "$password" >> "$out_path"
+  else
+    printf "%s\n" "$password"
+  fi
 done

@@ -6,20 +6,21 @@
 
 - l (length): Sets the length of the password(s). Takes a larger than 0 integer. Default is 32
 - r (count): Count of printed out password(s). Takes a larger than 0 integer. Default is 1
+- o (output): Appends output(s) to file instead of stdout.
 
 ### Flags:
 
-- s (symbols): Include symbols in the charset
-- c (challenge mode): Challenge-response code generator for security key(s), like YubiKey
-- n (numbers only): Password must contain number(s) only
-- L (lowercase): Uses lowercase alphanumeric characters in the charset
-- N (number need): Password must contain a digit
-- C (character needed): Password must contain an alphanumeric character
-- S (symbol needed): Password must contain a symbol
-- h (help): Shows help message
-- easy (easy): Sets parameters for an easy password (Can be freely combined with other available flags)
-- medium (medium): Sets parameters for a mediun password (Can be freely combined with other available flags)
-- hard (hard): Sets parameters for a hard password (Can be freely combined with other available flags)
+- s (symbols): Include symbols in the charset.
+- c (challenge mode): Challenge-response code generator for security key(s), like YubiKey.
+- n (numbers only): Password must contain number(s) only.
+- L (lowercase): Uses lowercase alphanumeric characters in the charset.
+- N (number need): Password must contain a digit.
+- C (character needed): Password must contain an alphanumeric character.
+- S (symbol needed): Password must contain a symbol.
+- h (help): Shows help message.
+- easy (easy): Sets parameters for an easy password. (Can be freely combined with other available flags)
+- medium (medium): Sets parameters for a mediun password. (Can be freely combined with other available flags)
+- hard (hard): Sets parameters for a hard password. (Can be freely combined with other available flags)
 
 ## Usage
 
@@ -45,4 +46,10 @@ c6c249b3b0982e6b95e8be9ed121e350
 # hard password with modified length
 ~ ./rpw --hard -l 24       
 ;!]CL|12?W3wl=}Q=1=I=f7M
+
+# Output passwords to file
+~ ./rpw --easy -r 2 -o test.pw
+~ cat ./test.pw                                   
+aammj39i
+wo7owhey
 ```
