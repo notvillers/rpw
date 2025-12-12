@@ -197,7 +197,7 @@ for (( i=0; i<repeat_count; i++ )); do
     [ "$must_have_number" -eq 1 ] && ! [[ "$password" =~ [0-9] ]] && ok=0
 
     # Check for alphabetic char, if needed
-    [ "$must_have_char" -eq 1 ]   && ! [[ "$password" =~ [A-Za-z] ]] && ok=0
+    [ "$must_have_char" -eq 1 ] && ! [[ "$password" =~ [A-Za-z] ]] && ok=0
 
     # Check for symbol, if needed
     [ "$must_have_symbol" -eq 1 ] && ! [[ "$password" =~ [^A-Za-z0-9] ]] && ok=0
