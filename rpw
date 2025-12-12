@@ -26,20 +26,21 @@ Description:
 R(andom)P(ass)W(ord) generates a random string from the (pre)specified charset, default charset is [A-Za-z0-9].
 
 Options:
-  -l <length>     Set password length (default: $length)
-  -r <count>      Number of generated password(s) (default: $repeat_count)
-  -s              Include symbols
-  -c              Challenge mode (charset: $challenge_charset)
-  -L              Use lowercase alphanumeric only
-  -n              Password must contain number(s) only
-  -N              Password must contain a digit
-  -C              Password must contain a character
-  -S              Password must contain a symbol
-  -o <file>       Appends output(s) to file instead of stdout
-  -h, --help      Show this help message
-  --easy          Sets parameters for an easy password (Can be freely combined with other available flags)
-  --medium        Sets parameters for a medium password (Can be freely combined with other available flags)
-  --hard          Sets parameters for a hard password (Can be freely combined with other available flags)
+  -l <length>       Set password length (default: $length)
+  -r <count>        Number of generated password(s) (default: $repeat_count)
+  -s                Include symbols
+  -c                Challenge-response charset (charset: $challenge_charset)
+  -L                Use lowercase alphanumeric only
+  -n                Password must contain number(s) only
+  -N                Password must contain a digit
+  -A                Password must contain an alphabetic character
+  -S                Password must contain a symbol
+  -o <file>         Appends output(s) to file instead of stdout
+  -h, --help        Show this help message
+  --easy            Sets parameters for an easy password (Can be freely combined with other available flags and parameters)
+  --medium          Sets parameters for a medium password (Can be freely combined with other available flags and parameters)
+  --hard            Sets parameters for a hard password (Can be freely combined with other available flags and parameters)
+  --yubi-challenge  Sets parameters for an ideal Yubikey challenge-response (Can be freely combined with other available flags and parameters)
 EOF
 }
 
@@ -59,7 +60,14 @@ set_hard() {
   use_symbols=1
   must_have_number=1
   must_have_char=1
-  must_have_char=1
+  must_have_symbol=1
+}
+
+set_yubi_challenge() {
+  lower_only=1
+  use_symbols=0
+  length=40
+  challenge_mode=1
 }
 
 args=()
@@ -79,6 +87,9 @@ for arg in "$@"; do
     --hard)
       set_hard
       ;;
+    --yubi-challenge)
+      set_yubi_challenge
+      ;;
     *)
       args+=("$arg")
       ;;
@@ -88,7 +99,7 @@ done
 set -- "${args[@]}"
 
 # Options
-while getopts ":l:r:sncLNCSo:h" opt; do
+while getopts ":l:r:sncLNASo:h" opt; do
   case "$opt" in
     l) length="$OPTARG" ;;
     r) repeat_count="$OPTARG" ;;
@@ -97,7 +108,7 @@ while getopts ":l:r:sncLNCSo:h" opt; do
     c) challenge_mode=1 ;;
     L) lower_only=1 ;;
     N) must_have_number=1 ;;
-    C) must_have_char=1 ;;
+    A) must_have_char=1 ;;
     S) must_have_symbol=1 ;;
     o) out_path="$OPTARG" ;;
     h) print_help; exit 0 ;;
