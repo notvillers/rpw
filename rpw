@@ -183,14 +183,17 @@ fi
 
 # Password generation function
 generate_pw() {
-  LC_ALL=C tr -dc "$charset" < /dev/urandom | head -c "$length"
+  local pw
+  pw=$(LC_ALL=C tr -dc "$charset" < /dev/urandom | head -c "$length")
+  [ "${#pw}" -eq "$length" ] || return 1
+  printf '%s' "$pw"
 }
 
 # Generating password with constraint checks
 for (( i=0; i<repeat_count; i++ )); do
   password=""
   while :; do
-    password=$(generate_pw)
+    password=$(generate_pw) || continue
     ok=1
 
     # Check for number, if needed
@@ -198,7 +201,6 @@ for (( i=0; i<repeat_count; i++ )); do
 
     # Check for alphabetic char, if needed
     [ "$must_have_char" -eq 1 ] && ! [[ "$password" =~ [A-Za-z] ]] && ok=0
-
     # Check for symbol, if needed
     [ "$must_have_symbol" -eq 1 ] && ! [[ "$password" =~ [^A-Za-z0-9] ]] && ok=0
 
