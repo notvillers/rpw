@@ -1,5 +1,6 @@
 #!/bin/bash
-set -e
+set -u
+set -o pipefail
 
 # Default variables
 length=32
@@ -17,7 +18,7 @@ out_path=""
 challenge_charset="abcdef0123456789"
 
 # POSIX-safe symbol set
-symbol_charset='!@#$%^&*()_+=[]{}|;:,.<>?/~-'
+symbol_charset='-!@#$%^&*()_+=[]{}|;:,.<>?/~'
 
 print_help() {
   cat <<EOF
@@ -127,15 +128,18 @@ fi
 # Charset selection
 if [ "$challenge_mode" -eq 1 ]; then
   charset="$challenge_charset"
+
 elif [ "$numbers_only" -eq 1 ]; then
-  charset='0-9'
+  charset='[:digit:]'
 else
   if [ "$lower_only" -eq 1 ]; then
-    charset='a-z0-9'
+    charset='[:lower:][:digit:]'
   else
-    charset='A-Za-z0-9'
+    charset='[:alnum:]'
   fi
-  [ "$use_symbols" -eq 1 ] && charset="${charset}${symbol_charset}"
+  if [ "$use_symbols" -eq 1 ] || [ "$must_have_symbol" -eq 1 ]; then
+    charset="${charset}[:punct:]"
+  fi
 fi
 
 # Generator (length-safe)
@@ -148,9 +152,12 @@ generate_pw() {
 
 for ((i=0; i<repeat_count; i++)); do
   while :; do
-    password=$(generate_pw) || continue
-    ok=1
+    password=""
+    if ! password="$(generate_pw)"; then
+      continue
+    fi
 
+    ok=1
     [ "$must_have_number" -eq 1 ] && ! [[ "$password" =~ [0-9] ]] && ok=0
     [ "$must_have_char" -eq 1 ] && ! [[ "$password" =~ [A-Za-z] ]] && ok=0
     [ "$must_have_symbol" -eq 1 ] && ! [[ "$password" =~ [^A-Za-z0-9] ]] && ok=0
