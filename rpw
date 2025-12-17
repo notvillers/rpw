@@ -15,7 +15,7 @@ min_length=0 # Varies by given -N, -C and -S flags
 out_path="" # Out put path if given
 
 challenge_charset="abcdef0123456789" # Charset for challenge-response
-symbol_charset="!@#\$%^&*()_+-=[]{}|;:,.<>?/" # Charset for symbols
+symbol_charset='!@#$%^&*()_+=\[\]{}|;:,.<>?/~-' # Charset for symbols
 
 # Print help
 print_help() {
