@@ -15,6 +15,7 @@ must_have_symbol=0
 min_length=0
 out_path=""
 
+# YubiKey challenge-response charset
 challenge_charset="abcdef0123456789"
 
 # POSIX-safe symbol set
@@ -81,7 +82,7 @@ for arg in "$@"; do
     *) args+=("$arg") ;;
   esac
 done
-set -- "${args[@]}"
+set -- "${args[@]:-}"
 
 while getopts ":l:r:sncLNASo:h" opt; do
   case "$opt" in
