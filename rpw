@@ -31,7 +31,7 @@ Options:
   -l <length>       Set password length (default: $length)
   -r <count>        Number of generated password(s)
   -s                Include symbols
-  -c                Challenge-response charset
+  -c                Challenge-response charset (for YubiKey)
   -L                Use lowercase alphanumeric only
   -n                Numbers only
   -N                Must contain a digit
