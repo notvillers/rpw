@@ -1,55 +1,49 @@
-# R(andom) P(ass)W(ord)
+# rpw — Random PassWord 🔐
 
-## Parameters and flags
+A tiny, POSIX-friendly password generator written as a single bash script. Fast, dependency-free, and designed for secure random output from /dev/urandom.
 
-### Parameters:
+## Quick start
 
-- l (length): Sets the length of the password(s). Takes a larger than 0 integer. Default is 32
-- r (count): Count of printed out password(s). Takes a larger than 0 integer. Default is 1
-- o (output): Appends output(s) to file instead of stdout.
+- Make executable: chmod +x ./rpw
+- Run: ./rpw
+- Run with presets: ./rpw --easy | --medium | --hard
 
-### Flags:
+## Parameters
 
-- s (symbols): Include symbols in the charset.
-- c (challenge mode): Challenge-response code generator for security key(s), like YubiKey.
-- n (numbers only): Password must contain number(s) only.
-- L (lowercase): Uses lowercase alphanumeric characters in the charset.
-- N (number need): Password must contain a digit.
-- C (character needed): Password must contain an alphanumeric character.
-- S (symbol needed): Password must contain a symbol.
-- h (help): Shows help message.
-- easy (easy): Sets parameters for an easy password. (Can be freely combined with other available flags)
-- medium (medium): Sets parameters for a mediun password. (Can be freely combined with other available flags)
-- hard (hard): Sets parameters for a hard password. (Can be freely combined with other available flags)
+- -l <length>  Set password length (default: 32)
+- -r <count>   Number of passwords to generate (default: 1)
+- -o <file>    Append outputs to file instead of stdout
 
-## Usage
+## Flags
 
-### Examples
+- -s           Include symbols in the charset
+- -c           Challenge/response mode (hex charset; for YubiKey-like flows)
+- -n           Numbers only
+- -L           Lowercase alphanumeric only
+- -N           Require at least one digit
+- -A           Require at least one alphabetic character (script uses -A)
+- -S           Require at least one symbol
+- -h, --help   Show help
+- --easy       Preset: easy (short, lowercase)
+- --medium     Preset: medium (balanced)
+- --hard       Preset: hard (symbols + stricter requirements)
+- --yubi-challenge  Preset: yubi-compatible challenge (hex)
 
-```
-# default
-~ ./rpw
-OTe6KDEVGwDvkwYsUqNSkcgFsDJV4nB8
+## Examples
 
-# set length and flags
-~ ./rpw -l 8 -N -C -S
-w7z@.Sk=
+- Default: ./rpw
+- Simple 8-char with all classes: ./rpw -l 8 -N -A -S
+- Repeat 5 challenge responses: ./rpw -c -r 5
+- Hard preset with custom length: ./rpw --hard -l 24
+- Save two easy passwords: ./rpw --easy -r 2 -o passwords.txt
 
-# repeated challenge-response(s)
-~ ./rpw -c -r 5
-cad28c8425f3f83d70037e3ab8cad0ea
-d10c4ef5f09e813f91915890112c32e3
-95e3af1f5d9344fcaf2546c3c3e6a96b
-c6c249b3b0982e6b95e8be9ed121e350
-79f1ad3700f47b5e30fa271b2a1e3ea3
+## Notes
 
-# hard password with modified length
-~ ./rpw --hard -l 24       
-;!]CL|12?W3wl=}Q=1=I=f7M
+- Uses LC_ALL=C with tr for locale-safe byte filtering from /dev/urandom.
+- Script enforces minimum length when "must-have" flags are set.
+- No external dependencies: just bash, tr, head, and /dev/urandom.
 
-# Output passwords to file
-~ ./rpw --easy -r 2 -o test.pw
-~ cat ./test.pw                                   
-aammj39i
-wo7owhey
-```
+## Contributing
+
+- Small repo: keep changes minimal and shellcheck-friendly.
+- Consider adding tests (bats/shunit2) and CI lint (shellcheck) if contributing larger changes.
