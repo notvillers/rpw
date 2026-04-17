@@ -201,21 +201,21 @@ for ((i=0; i<repeat_count; i++)); do
   results+=("$password")
 done
 
+# Determine whether to suppress stdout: if writing to file or copying to clipboard, don't echo
+suppress_stdout=0
+if [ "$clipboard" -eq 1 ] || [ -n "$out_path" ]; then
+  suppress_stdout=1
+fi
+
 # Output formatting
 case "$format" in
   plain)
     if [ -n "$out_path" ]; then
       for p in "${results[@]}"; do printf '%s\n' "$p" >> "$out_path"; done
     else
-      for p in "${results[@]}"; do printf '%s\n' "$p"; done
-    fi
-    ;;
-  csv)
-    # simple CSV: one password per line
-    if [ -n "$out_path" ]; then
-      for p in "${results[@]}"; do printf '%s\n' "$p" >> "$out_path"; done
-    else
-      for p in "${results[@]}"; do printf '%s\n' "$p"; done
+      if [ "$suppress_stdout" -eq 0 ]; then
+        for p in "${results[@]}"; do printf '%s\n' "$p"; done
+      fi
     fi
     ;;
   json)
@@ -224,7 +224,9 @@ case "$format" in
       if [ -n "$out_path" ]; then
         printf '{"password":"%s"}\n' "$esc" >> "$out_path"
       else
-        printf '{"password":"%s"}\n' "$esc"
+        if [ "$suppress_stdout" -eq 0 ]; then
+          printf '{"password":"%s"}\n' "$esc"
+        fi
       fi
     else
       if [ -n "$out_path" ]; then
@@ -241,18 +243,20 @@ case "$format" in
         done
         printf ']\n' >> "$out_path"
       else
-        printf '['
-        first=1
-        for p in "${results[@]}"; do
-          esc=$(json_escape "$p")
-          if [ "${first}" -eq 1 ]; then
-            printf '"%s"' "$esc"
-            first=0
-          else
-            printf ',"%s"' "$esc"
-          fi
-        done
-        printf ']\n'
+        if [ "$suppress_stdout" -eq 0 ]; then
+          printf '['
+          first=1
+          for p in "${results[@]}"; do
+            esc=$(json_escape "$p")
+            if [ "${first}" -eq 1 ]; then
+              printf '"%s"' "$esc"
+              first=0
+            else
+              printf ',"%s"' "$esc"
+            fi
+          done
+          printf ']\n'
+        fi
       fi
     fi
     ;;
