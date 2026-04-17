@@ -13,6 +13,8 @@ A tiny, POSIX-friendly password generator written as a single bash script. Fast,
 - `-l <length>` Set password length (default: 32)
 - `-r <count>`  Number of passwords to generate (default: 1)
 - `-o <file>`   Append outputs to file instead of stdout
+- `-o <file>`   Append outputs to file instead of stdout
+- `-f <format>`, `--format=<format>`    Output format: plain (default), json, csv
 
 ## Flags
 
@@ -23,10 +25,7 @@ A tiny, POSIX-friendly password generator written as a single bash script. Fast,
 - `-N`  Require at least one digit
 - `-A`  Require at least one alphabetic character (script uses -A)
 - `-S`  Require at least one symbol
-- `-f <format>`     Output format: plain (default), json, csv
-- `--format=<fmt>`  Same as -f (accepts --format=json)
-- `-b, --clipboard` Copy last generated password to clipboard (pbcopy/xclip/xsel) if available; does not fail if clipboard tool missing
-- `-o <file>`   Append outputs to file instead of stdout
+- `-b`, `--clipboard` Copy last generated password to clipboard (pbcopy/xclip/xsel) if available; does not fail if clipboard tool missing
 - `-h`, `--help`    Show help
 - `--easy`  Preset: easy (short, lowercase)
 - `--medium`    Preset: medium (balanced)
