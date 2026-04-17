@@ -23,11 +23,18 @@ A tiny, POSIX-friendly password generator written as a single bash script. Fast,
 - `-N`  Require at least one digit
 - `-A`  Require at least one alphabetic character (script uses -A)
 - `-S`  Require at least one symbol
+- `-f <format>`     Output format: plain (default), json, csv
+- `--format=<fmt>`  Same as -f (accepts --format=json)
+- `-b, --clipboard` Copy last generated password to clipboard (pbcopy/xclip/xsel) if available; does not fail if clipboard tool missing
+- `-o <file>`   Append outputs to file instead of stdout
 - `-h`, `--help`    Show help
 - `--easy`  Preset: easy (short, lowercase)
 - `--medium`    Preset: medium (balanced)
 - `--hard`  Preset: hard (symbols + stricter requirements)
 - `--yubi-challenge`    Preset: yubi-compatible challenge (hex)
+
+Notes:
+- When writing to a file (-o) or copying to the clipboard (-b/--clipboard), the script will not echo passwords to stdout for safety. Use -o / -f to capture output instead.
 
 ## Examples
 
