@@ -14,6 +14,9 @@ must_have_char=0
 must_have_symbol=0
 min_length=0
 out_path=""
+# Output/clipboard options
+format="plain"   # plain|json|csv
+clipboard=0      # 1 to copy last password to clipboard (pbcopy/xclip/xsel)
 
 # YubiKey challenge-response charset
 challenge_charset="abcdef0123456789"
@@ -38,6 +41,9 @@ Options:
   -A                Must contain an alphabetic character
   -S                Must contain a symbol
   -o <file>         Append output(s) to file
+  -f <format>       Output format: plain (default), json, csv
+  --format=<fmt>    Same as -f (accepts --format=json)
+  --clipboard       Copy last generated password to clipboard (pbcopy/xclip/xsel) if available
   -h, --help        Show help
   --easy            Easy password
   --medium          Medium password
@@ -79,12 +85,14 @@ for arg in "$@"; do
     --medium) set_medium ;;
     --hard) set_hard ;;
     --yubi-challenge) set_yubi_challenge ;;
+    --clipboard) clipboard=1 ;;
+    --format=*) format="${arg#*=}" ;;
     *) args+=("$arg") ;;
   esac
 done
 set -- "${args[@]:-}"
 
-while getopts ":l:r:sncLNASo:h" opt; do
+while getopts ":l:r:sncLNASo:hf:b" opt; do
   case "$opt" in
     l) length="$OPTARG" ;;
     r) repeat_count="$OPTARG" ;;
@@ -96,6 +104,8 @@ while getopts ":l:r:sncLNASo:h" opt; do
     A) must_have_char=1 ;;
     S) must_have_symbol=1 ;;
     o) out_path="$OPTARG" ;;
+    f) format="$OPTARG" ;;
+    b) clipboard=1 ;;
     h) print_help; exit 0 ;;
     \?) printf "Invalid option: -%s\n" "$OPTARG"; exit 1 ;;
   esac
@@ -151,6 +161,28 @@ generate_pw() {
   printf '%s' "$pw"
 }
 
+# Escape a string for JSON (minimal: backslash, double-quote, CR, LF)
+json_escape() {
+  # awk is used to avoid external dependencies; ensures common escapes
+  printf '%s' "$1" | awk 'BEGIN{ORS=""} { gsub(/\\\\/,"\\\\\\\\"); gsub(/\"/,"\\\""); gsub(/\r/,"\\r"); gsub(/\n/,"\\n"); print $0 }'
+}
+
+copy_to_clipboard() {
+  local data="$1"
+  if command -v pbcopy >/dev/null 2>&1; then
+    printf '%s' "$data" | pbcopy
+    return 0
+  elif command -v xclip >/dev/null 2>&1; then
+    printf '%s' "$data" | xclip -selection clipboard
+    return 0
+  elif command -v xsel >/dev/null 2>&1; then
+    printf '%s' "$data" | xsel --clipboard --input
+    return 0
+  fi
+  return 1
+}
+
+results=()
 for ((i=0; i<repeat_count; i++)); do
   while :; do
     password=""
@@ -166,9 +198,70 @@ for ((i=0; i<repeat_count; i++)); do
     [ "$ok" -eq 1 ] && break
   done
 
-  if [ -n "$out_path" ]; then
-    printf "%s\n" "$password" >> "$out_path"
-  else
-    printf "%s\n" "$password"
-  fi
+  results+=("$password")
 done
+
+# Output formatting
+case "$format" in
+  plain)
+    if [ -n "$out_path" ]; then
+      for p in "${results[@]}"; do printf '%s\n' "$p" >> "$out_path"; done
+    else
+      for p in "${results[@]}"; do printf '%s\n' "$p"; done
+    fi
+    ;;
+  csv)
+    # simple CSV: one password per line
+    if [ -n "$out_path" ]; then
+      for p in "${results[@]}"; do printf '%s\n' "$p" >> "$out_path"; done
+    else
+      for p in "${results[@]}"; do printf '%s\n' "$p"; done
+    fi
+    ;;
+  json)
+    if [ "${#results[@]}" -eq 1 ]; then
+      esc=$(json_escape "${results[0]}")
+      if [ -n "$out_path" ]; then
+        printf '{"password":"%s"}\n' "$esc" >> "$out_path"
+      else
+        printf '{"password":"%s"}\n' "$esc"
+      fi
+    else
+      if [ -n "$out_path" ]; then
+        printf '[' >> "$out_path"
+        first=1
+        for p in "${results[@]}"; do
+          esc=$(json_escape "$p")
+          if [ "${first}" -eq 1 ]; then
+            printf '"%s"' "$esc" >> "$out_path"
+            first=0
+          else
+            printf ',"%s"' "$esc" >> "$out_path"
+          fi
+        done
+        printf ']\n' >> "$out_path"
+      else
+        printf '['
+        first=1
+        for p in "${results[@]}"; do
+          esc=$(json_escape "$p")
+          if [ "${first}" -eq 1 ]; then
+            printf '"%s"' "$esc"
+            first=0
+          else
+            printf ',"%s"' "$esc"
+          fi
+        done
+        printf ']\n'
+      fi
+    fi
+    ;;
+  *) printf 'Error: unknown format: %s\n' "$format" >&2; exit 1 ;;
+esac
+
+# Clipboard: copy last password if requested; do not fail if no clipboard tool
+if [ "$clipboard" -eq 1 ] && [ "${#results[@]}" -gt 0 ]; then
+  last_index=$(( ${#results[@]} - 1 ))
+  last="${results[$last_index]}"
+  copy_to_clipboard "$last" >/dev/null 2>&1 || true
+fi
